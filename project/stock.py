@@ -7,6 +7,8 @@ class Stock(Investment):
         self.appreciation = appreciation
         self.dividend = dividend
         self.expense_ratio = expense_ratio
+        self.purchase_price = value
+        self.realized_gains = 0
     
     def simulate_month(self, month):
         self.income = 0
@@ -18,9 +20,13 @@ class Stock(Investment):
         # happens every quarter
         if month % 3 == 0:
             self.income += self.value * (self.dividend / 100) / 4
+            self.realized_gains += self.income
 
         # happens every year
         if month % 12 == 0:
             self.value *= (1 - self.expense_ratio / 100)
 
         self.net_worth = self.value
+
+    def __str__(self):
+        return f"{self.__class__.__name__}: {self.name}   Value: {self.fc(self.value)}   Unrealized Gains: {self.fc(self.value - self.purchase_price)}   Realized Gains: {self.fc(self.realized_gains)}"

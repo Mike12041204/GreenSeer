@@ -1,5 +1,6 @@
 from stock import Stock
 from investor import Investor
+import locale
 
 class Simulation:
     def __init__(self):
@@ -14,36 +15,44 @@ class Simulation:
         print()
 
         running = True
+        skip = 0
 
         while running:
             print("-------------------------------------------")
             print(f"Investor: {self.investor.name}   Month: {self.month}")
-            print("-------------------------------------------")
-            print("Menu:")
-            print("0: End Simulation")
-            print("1: Finish Month")
-            print("2: Add Investment")
-            print("3: Manage Investment")
-            print("-------------------------------------------")
+            if skip == 0:
+                print("-------------------------------------------")
+                print("Menu:")
+                print("0: End Simulation")
+                print("1: Finish Month")
+                print("2: Add Investment")
+                print("3: Manage Investment")
+                print("4: Simulate Year")
+                print("-------------------------------------------")
 
-            while True:
+            while skip == 0:
                 selection = -1
-                while selection < 0 or selection > 3:
+                while selection < 0 or selection > 4:
                     selection = int(input("Make a Selection: "))
                 
                 if selection == 0:
                     running = False
                     break
                 elif selection == 1:
-                    self.simulate_month()
                     break
                 elif selection == 2:
                     self.add_investment()
                 elif selection == 3:
-                    self.manage_investment()       
+                    self.manage_investment()   
+                elif selection == 4:
+                    skip = 12
+
+            if skip > 0:
+                skip -= 1   
 
             print("-------------------------------------------")
-            print(f"Net Worth: {self.investor.net_worth}   Month Income: {self.investor.monthly_income}")
+            self.simulate_month()
+            print(f"Net Worth: {self.fc(self.investor.net_worth)}   Month Income: {self.fc(self.investor.monthly_income)}")
             print("-------------------------------------------")
             print()
             print()
@@ -59,6 +68,8 @@ class Simulation:
             self.investor.monthly_income += investment.income
             self.investor.cash += investment.income
             self.investor.net_worth += investment.net_worth
+
+            print(f"{investment}")
 
         self.investor.yearly_income += self.investor.monthly_income
 
@@ -120,4 +131,7 @@ class Simulation:
 
 
     def manage_investment(self):
-        print()
+        pass
+
+    def fc(self, amount):
+        return f"${amount:,.2f}"

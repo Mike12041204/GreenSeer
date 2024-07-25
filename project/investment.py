@@ -9,3 +9,10 @@ class Investment(ABC):
     @abstractmethod
     def simulate_month(self, month):
         pass
+
+    @abstractmethod
+    def __str__(self, month):
+        pass
+
+    def fc(self, amount):
+        return f"${amount:,.2f}"
