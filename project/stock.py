@@ -1,5 +1,6 @@
 from investment import Investment
 
+# TODO - handling selling long term and short term capital gains
 class Stock(Investment):
     def __init__(self, name, value, appreciation, dividend, expense_ratio):
         super().__init__(name)
@@ -11,7 +12,7 @@ class Stock(Investment):
         self.realized_gains = 0
     
     def simulate_month(self, month):
-        self.income = 0
+        self.investment_income = 0
         self.net_worth = 0
 
         # happens every month
@@ -19,8 +20,8 @@ class Stock(Investment):
 
         # happens every quarter
         if month % 3 == 0:
-            self.income += self.value * (self.dividend / 100) / 4
-            self.realized_gains += self.income
+            self.investment_income += self.value * (self.dividend / 100) / 4
+            self.realized_gains += self.investment_income
 
         # happens every year
         if month % 12 == 0:
