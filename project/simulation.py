@@ -1,8 +1,10 @@
 from stock import Stock
 from investor import Investor
-from parameter import Parameter
+from project.taxes import Parameter
 import locale
 
+# Simulation class is repsonsible for handling input and output and triggering events.
+# The class should not perform complex arithmetic
 class Simulation:
     def __init__(self):
         self.parameter = Parameter()
