@@ -63,6 +63,19 @@ class Taxes:
     # state and local government SALT taxes are deductable up to 10,000 on federal taxes
     __SALT_DEDUCTION_CAP = 10_000
 
+    # federal long term capital gains tax
+    __FEDERAL_LTCG_BRACKET_1 = 0
+    __FEDERAL_LTCG_BRACKET_2 = 44_625
+    __FEDERAL_LTCG_BRACKET_3 = 429_300
+    __FEDERAL_LTCG_RATE_1 = 0
+    __FEDERAL_LTCG_RATE_2 = 15
+    __FEDERAL_LTCG_RATE_3 = 20
+    # New Jersey taxes capital gains as normal income so they have no brackets
+
+    # if you make over 200,000 a year you have to pay 3.8 on all investment gains above that
+    __NIIT_THRESHOLD = 200_000
+    __NIIT_RATE = 3.8
+
     @staticmethod
     def calculate_federal_tax(income, itemized_deduction):
         taxes = 0
@@ -171,6 +184,7 @@ class Taxes:
 
         return taxes
     
+    # TODO - state shouldn't be a part of this emthod and should be done on earned a ltcg before any federal taxes
     @staticmethod
     def calculate_earned_income_tax(income, itemized_deduction, current_salt_deduction):
         """Calculates the taxes owed on income earned from a job.
@@ -189,6 +203,7 @@ class Taxes:
         state_taxes = Taxes.calculate_state_tax(income, itemized_deduction)
 
         # add state tax to deduction keeping in mind salt cap
+        # TODO - update so logic modifies current_salt_deduction
         itemized_deduction += state_taxes if current_salt_deduction + state_taxes <= Taxes.__SALT_DEDUCTION_CAP else Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction
 
         federal_taxes = Taxes.calculate_federal_tax(income, itemized_deduction)
@@ -198,4 +213,54 @@ class Taxes:
             print(f"FICA: {fica_taxes}")
             print(f"State: {state_taxes}")
 
-        return fica_taxes + state_taxes + federal_taxes
+        # returns a tuple of the taxes paid on earned income, the modifed itemized deduction, and the current salt deduction
+        return fica_taxes + state_taxes + federal_taxes, itemized_deduction, current_salt_deduction
+    
+    @staticmethod
+    def calculate_federal_ltcg_tax(earned_income, ltcg, deduction):
+        taxes = 0
+
+        total_income = earned_income + ltcg
+        # TODO - handle deduction if exists after earned tax
+
+        # bracket 3
+        if total_income > Taxes.__FEDERAL_LTCG_BRACKET_3:
+            ltcg_above = total_income - Taxes.__FEDERAL_LTCG_BRACKET_3 if ltcg >= total_income - Taxes.__FEDERAL_LTCG_BRACKET_3 else ltcg
+            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_3 / 100)
+            ltcg -= ltcg_above
+            total_income -= ltcg_above
+        # bracket 2
+        if total_income > Taxes.__FEDERAL_LTCG_BRACKET_2:
+            ltcg_above = total_income - Taxes.__FEDERAL_LTCG_BRACKET_2 if ltcg >= total_income - Taxes.__FEDERAL_LTCG_BRACKET_2 else ltcg
+            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_2 / 100)
+            ltcg -= ltcg_above
+            total_income -= ltcg_above
+        # bracket 1
+        if total_income > Taxes.__FEDERAL_LTCG_BRACKET_1:
+            ltcg_above = total_income - Taxes.__FEDERAL_LTCG_BRACKET_1 if ltcg >= total_income - Taxes.__FEDERAL_LTCG_BRACKET_1 else ltcg
+            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_1 / 100)
+            ltcg -= ltcg_above
+            total_income -= ltcg_above
+
+        return taxes
+
+    @staticmethod
+    def calculate_niit_tax(earned_income, ltcg, deduction):
+        """TODO
+        """
+
+        taxes = 0
+
+        total_income = earned_income + ltcg
+
+        niit_applicable = ltcg if earned_income >= Taxes.__NIIT_THRESHOLD else total_income - Taxes.__NIIT_THRESHOLD
+        taxes += niit_applicable * (Taxes.__NIIT_RATE / 100)
+
+        return taxes
+    
+    @staticmethod
+    def calculate_ltcg_tax(earned_income, ltcg, itemized_deduction, current_salt_deduction):
+        """TODO
+        """
+
+        pass
