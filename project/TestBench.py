@@ -3,10 +3,12 @@ from taxes import Taxes
 
 # Test bench class should be used to test features while being implented
 def main():
-    income = int(sys.argv[1])
+    earned_income = int(sys.argv[1])
+    long_term_capital_gains = int(sys.argv[2])
     itemized_deduction = 0
     current_salt_deduction = 0
-    Taxes.calculate_earned_income_tax(income, itemized_deduction, current_salt_deduction)
+    fltcg = Taxes._Taxes__federal_long_term_capital_gains_tax(earned_income, long_term_capital_gains, itemized_deduction)
+    print(f"Capital Gains:\nFederal: {fltcg}")
 
 if __name__ == "__main__":
     main()
