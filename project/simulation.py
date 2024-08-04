@@ -1,13 +1,11 @@
 from stock import Stock
 from investor import Investor
-from project.taxes import Parameter
 import locale
 
 # Simulation class is repsonsible for handling input and output and triggering events.
 # The class should not perform complex arithmetic
 class Simulation:
     def __init__(self):
-        self.parameter = Parameter()
         self.month = 1
         name = input("Enter Investor Name: ")
         self.investor = Investor(name)
@@ -71,25 +69,6 @@ class Simulation:
         self.investor.net_worth = 0
         self.investor.month_profit = 0
 
-        # simulate and track income and expenses for the month
-        witheld_taxes = 0
-        month_income = self.investor.salary / 12
-        # apply Social Security tax
-        if self.investor.job_income < self.parameter.social_limit:
-            witheld_taxes += month_income * (self.parameter.social_security / 100)
-
-        # add month income to total to overestimate taxes witheld
-        self.investor.job_income += month_income
-        
-        # apply Medicare tax
-        if self.investor.job_income < self.parameter.medicare_threshold:
-            witheld_taxes += month_income * (self.parameter.medicare / 100)
-        else:
-            witheld_taxes += month_income * ((self.parameter.medicare + self.parameter.medicare_additional) / 100)
-
-        self.investor.cash += month_income - witheld_taxes
-        self.investor.taxes_paid += witheld_taxes
-
         # simulate and track investments for the month
         for investment in self.investor.investments:
             investment.simulate_month(self.month)
@@ -101,88 +80,7 @@ class Simulation:
             self.investor.cash += investment.investment_income
             self.investor.net_worth += investment.net_worth
 
-        # every year
-        if self.month % 12 == 0:
-            # calculate taxes
-            taxes = self.calculate_taxes()
-            # pay or recieve difference in taxes witheld from income
-            tax_difference = taxes - self.investor.taxes_paid
-            self.investor.cash -= tax_difference
-
-            total_income = self.investor.investment_income + self.investor.capital_gains + self.investor.job_income
-            print(f"Taxes: {self.fc(taxes)}   Effective Rate: {self.fp(taxes / total_income)}")
-
-            # reset incomes
-            self.investor.investment_income = 0
-            self.investor.capital_gains = 0
-            self.investor.job_income = 0
-            self.investor.retirement_income = 0
-            self.investor.taxes_paid = 0
-
-        self.investor.net_worth += self.investor.cash
-
         self.month += 1
-
-    def calculate_taxes(self):
-        return 0
-    
-        # fica_taxes = 0
-
-        # # handle FICA
-        # fica_taxes += self.investor.yearly_income * (self.parameter.fica / 100)
-
-        # # handle State
-        # state_taxes = 0
-        # state_income = (self.investor.yearly_income - self.parameter.state_deduction) 
-        
-        # if state_income > self.parameter.mun6:
-        #     state_taxes += (state_income - self.parameter.mun6) * (self.parameter.mun7r / 100)
-        #     state_income = self.parameter.mun6
-        # if state_income > self.parameter.mun5:
-        #     state_taxes += (state_income - self.parameter.mun5) * (self.parameter.mun6r / 100)
-        #     state_income = self.parameter.mun5
-        # if state_income > self.parameter.mun4:
-        #     state_taxes += (state_income - self.parameter.mun4) * (self.parameter.mun5r / 100)
-        #     state_income = self.parameter.mun4
-        # if state_income > self.parameter.mun3:
-        #     state_taxes += (state_income - self.parameter.mun3) * (self.parameter.mun4r / 100)
-        #     state_income = self.parameter.mun3
-        # if state_income > self.parameter.mun2:
-        #     state_taxes += (state_income - self.parameter.mun2) * (self.parameter.mun3r / 100)
-        #     state_income = self.parameter.mun2
-        # if state_income > self.parameter.mun1:
-        #     state_taxes += (state_income - self.parameter.mun1) * (self.parameter.mun2r / 100)
-        #     state_income = self.parameter.mun1
-        # if state_income > 0:
-        #     state_taxes += state_income * (self.parameter.mun1r / 100)
-
-        # # handle Federal
-        # federal_taxes = 0
-        # deduction = max(self.parameter.standard_deduction, self.investor.itemized_deduction)
-        # federal_income = (self.investor.yearly_income - deduction - state_taxes)
-
-        # if federal_income > self.parameter.fed6:
-        #     federal_taxes += (federal_income - self.parameter.fed6) * (self.parameter.fed7r / 100)
-        #     federal_income = self.parameter.fed6
-        # if federal_income > self.parameter.fed5:
-        #     federal_taxes += (federal_income - self.parameter.fed5) * (self.parameter.fed6r / 100)
-        #     federal_income = self.parameter.fed5
-        # if federal_income > self.parameter.fed4:
-        #     federal_taxes += (federal_income - self.parameter.fed4) * (self.parameter.fed5r / 100)
-        #     federal_income = self.parameter.fed4
-        # if federal_income > self.parameter.fed3:
-        #     federal_taxes += (federal_income - self.parameter.fed3) * (self.parameter.fed4r / 100)
-        #     federal_income = self.parameter.fed3
-        # if federal_income > self.parameter.fed2:
-        #     federal_taxes += (federal_income - self.parameter.fed2) * (self.parameter.fed3r / 100)
-        #     federal_income = self.parameter.fed2
-        # if federal_income > self.parameter.fed1:
-        #     federal_taxes += (federal_income - self.parameter.fed1) * (self.parameter.fed2r / 100)
-        #     federal_income = self.parameter.fed1
-        # if federal_income > 0:
-        #     federal_taxes += federal_income * (self.parameter.fed1r / 100)
-
-        # return fica_taxes + state_taxes + federal_taxes
 
     def add_investment(self):
         print("-------------------------------------------")
