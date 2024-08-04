@@ -183,7 +183,7 @@ class Simulation:
         #     federal_taxes += federal_income * (self.parameter.fed1r / 100)
 
         # return fica_taxes + state_taxes + federal_taxes
-
+    # only pertaining to non-owned assets 
     def add_investment(self):
         print("-------------------------------------------")
         print("Menu:")
@@ -204,7 +204,7 @@ class Simulation:
 
         print("-------------------------------------------")
 
-
+ 
     def add_stock(self):
         name = input("Enter the Name: ")
         while name in self.investor.investment_names:
@@ -233,6 +233,7 @@ class Simulation:
 
 
     # TODO - implement
+    # involves selling, refinancing, or other actions pertaining to owned assets
     def manage_investment(self):
         pass
 
