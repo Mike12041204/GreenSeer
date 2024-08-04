@@ -117,9 +117,9 @@ class Taxes:
         return taxes
     
     @staticmethod
-    def __state_tax(earned_income, long_term_capital_gains, deduction):
+    def __state_tax(earned_income, ltcg, deduction):
         taxes = 0
-        income = earned_income + long_term_capital_gains
+        income = earned_income + ltcg
 
         # apply deductions and state exemption
         income -= Taxes.__STATE_EXEMPTION
@@ -187,49 +187,49 @@ class Taxes:
     
     # CURSOR - doesnt work, refactor Taxes to use min and max methods
     @staticmethod
-    def __federal_long_term_capital_gains_tax(earned_income, long_term_capital_gains, deduction):
+    def __federal_ltcg_tax(earned_income, ltcg, deduction):
         taxes = 0
-        income = earned_income + long_term_capital_gains
+        income = earned_income + ltcg
 
         income -= Taxes.__FEDERAL_EXEMPTION
         income -= deduction
 
         # bracket 3
         if income > Taxes.__FEDERAL_LTCG_BRACKET_3:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_3 if long_term_capital_gains >= income - Taxes.__FEDERAL_LTCG_BRACKET_3 else long_term_capital_gains
+            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_3 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_3 else ltcg
             taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_3 / 100)
-            long_term_capital_gains -= ltcg_above
+            ltcg -= ltcg_above
             income -= ltcg_above
         # bracket 2
         if income > Taxes.__FEDERAL_LTCG_BRACKET_2:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_2 if long_term_capital_gains >= income - Taxes.__FEDERAL_LTCG_BRACKET_2 else long_term_capital_gains
+            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_2 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_2 else ltcg
             taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_2 / 100)
-            long_term_capital_gains -= ltcg_above
+            ltcg -= ltcg_above
             income -= ltcg_above
         # bracket 1
         if income > Taxes.__FEDERAL_LTCG_BRACKET_1:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_1 if long_term_capital_gains >= income - Taxes.__FEDERAL_LTCG_BRACKET_1 else long_term_capital_gains
+            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_1 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_1 else ltcg
             taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_1 / 100)
-            long_term_capital_gains -= ltcg_above
+            ltcg -= ltcg_above
             income -= ltcg_above
 
         return taxes
 
     @staticmethod
-    def __niit_tax(earned_income, long_term_capital_gains):
+    def __niit_tax(earned_income, ltcg):
         """TODO
         """
 
         taxes = 0
-        income = earned_income + long_term_capital_gains
+        income = earned_income + ltcg
 
-        niit_applicable = long_term_capital_gains if earned_income >= Taxes.__NIIT_THRESHOLD else income - Taxes.__NIIT_THRESHOLD
+        niit_applicable = ltcg if earned_income >= Taxes.__NIIT_THRESHOLD else income - Taxes.__NIIT_THRESHOLD
         taxes += niit_applicable * (Taxes.__NIIT_RATE / 100)
 
         return taxes
     
     @staticmethod
-    def calculate_tax(earned_income, long_term_capital_gains, itemized_deduction, current_salt_deduction):
+    def calculate_tax(earned_income, ltcg, itemized_deduction, current_salt_deduction):
         """TODO
         """
 
@@ -241,7 +241,7 @@ class Taxes:
         itemized_taxes += Taxes.__fica_tax(earned_income)
 
         # state taxes, which are deductable up to salt cap, and apply to capital gains as well
-        state_taxes = Taxes.__state_tax(earned_income, long_term_capital_gains, itemized_deduction)
+        state_taxes = Taxes.__state_tax(earned_income, ltcg, itemized_deduction)
         itemized_deduction += state_taxes if current_salt_deduction + itemized_deduction <= Taxes.__SALT_DEDUCTION_CAP else Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction
         itemized_taxes += state_taxes
 
@@ -250,8 +250,8 @@ class Taxes:
         itemized_deduction = 0 if itemized_deduction <= earned_income else itemized_deduction - earned_income
 
         # federal capital gains tax on top of earned income
-        itemized_taxes += Taxes.__federal_long_term_capital_gains_tax(earned_income, long_term_capital_gains, itemized_deduction)
-        itemized_taxes += Taxes.__niit_tax(earned_income, long_term_capital_gains)
+        itemized_taxes += Taxes.__federal_ltcg_tax(earned_income, ltcg, itemized_deduction)
+        itemized_taxes += Taxes.__niit_tax(earned_income, ltcg)
 
         standard_taxes = 0
         standard_deduction = Taxes.__FEDERAL_DEDUCTION
@@ -260,7 +260,7 @@ class Taxes:
         standard_taxes += Taxes.__fica_tax(earned_income)
 
         # state taxes, which are deductable up to salt cap, and apply to capital gains as well
-        state_taxes = Taxes.__state_tax(earned_income, long_term_capital_gains, standard_deduction)
+        state_taxes = Taxes.__state_tax(earned_income, ltcg, standard_deduction)
         standard_taxes += state_taxes
 
         # federal earned income tax
@@ -268,7 +268,7 @@ class Taxes:
         standard_deduction = 0 if standard_deduction <= earned_income else standard_deduction - earned_income
 
         # federal capital gains tax on top of earned income
-        standard_taxes += Taxes.__federal_long_term_capital_gains_tax(earned_income, long_term_capital_gains, standard_deduction)
-        standard_taxes += Taxes.__niit_tax(earned_income, long_term_capital_gains)
+        standard_taxes += Taxes.__federal_ltcg_tax(earned_income, ltcg, standard_deduction)
+        standard_taxes += Taxes.__niit_tax(earned_income, ltcg)
 
         return itemized_taxes if itemized_taxes < standard_taxes else standard_taxes
