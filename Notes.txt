@@ -1,0 +1,5 @@
+Types of income and taxes:
+Earned Income (job income): fica, state, federal
+Investment Income: state, federal
+LTCG: state, federal LTCG, niit
+Retirement Income (401k etc.): state, federal LTCG

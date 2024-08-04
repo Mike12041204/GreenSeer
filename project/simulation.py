@@ -81,67 +81,7 @@ class Simulation:
             self.investor.net_worth += investment.net_worth
 
         self.month += 1
-
-    def calculate_taxes(self):
-        return 0
     
-        # fica_taxes = 0
-
-        # # handle FICA
-        # fica_taxes += self.investor.yearly_income * (self.parameter.fica / 100)
-
-        # # handle State
-        # state_taxes = 0
-        # state_income = (self.investor.yearly_income - self.parameter.state_deduction) 
-        
-        # if state_income > self.parameter.mun6:
-        #     state_taxes += (state_income - self.parameter.mun6) * (self.parameter.mun7r / 100)
-        #     state_income = self.parameter.mun6
-        # if state_income > self.parameter.mun5:
-        #     state_taxes += (state_income - self.parameter.mun5) * (self.parameter.mun6r / 100)
-        #     state_income = self.parameter.mun5
-        # if state_income > self.parameter.mun4:
-        #     state_taxes += (state_income - self.parameter.mun4) * (self.parameter.mun5r / 100)
-        #     state_income = self.parameter.mun4
-        # if state_income > self.parameter.mun3:
-        #     state_taxes += (state_income - self.parameter.mun3) * (self.parameter.mun4r / 100)
-        #     state_income = self.parameter.mun3
-        # if state_income > self.parameter.mun2:
-        #     state_taxes += (state_income - self.parameter.mun2) * (self.parameter.mun3r / 100)
-        #     state_income = self.parameter.mun2
-        # if state_income > self.parameter.mun1:
-        #     state_taxes += (state_income - self.parameter.mun1) * (self.parameter.mun2r / 100)
-        #     state_income = self.parameter.mun1
-        # if state_income > 0:
-        #     state_taxes += state_income * (self.parameter.mun1r / 100)
-
-        # # handle Federal
-        # federal_taxes = 0
-        # deduction = max(self.parameter.standard_deduction, self.investor.itemized_deduction)
-        # federal_income = (self.investor.yearly_income - deduction - state_taxes)
-
-        # if federal_income > self.parameter.fed6:
-        #     federal_taxes += (federal_income - self.parameter.fed6) * (self.parameter.fed7r / 100)
-        #     federal_income = self.parameter.fed6
-        # if federal_income > self.parameter.fed5:
-        #     federal_taxes += (federal_income - self.parameter.fed5) * (self.parameter.fed6r / 100)
-        #     federal_income = self.parameter.fed5
-        # if federal_income > self.parameter.fed4:
-        #     federal_taxes += (federal_income - self.parameter.fed4) * (self.parameter.fed5r / 100)
-        #     federal_income = self.parameter.fed4
-        # if federal_income > self.parameter.fed3:
-        #     federal_taxes += (federal_income - self.parameter.fed3) * (self.parameter.fed4r / 100)
-        #     federal_income = self.parameter.fed3
-        # if federal_income > self.parameter.fed2:
-        #     federal_taxes += (federal_income - self.parameter.fed2) * (self.parameter.fed3r / 100)
-        #     federal_income = self.parameter.fed2
-        # if federal_income > self.parameter.fed1:
-        #     federal_taxes += (federal_income - self.parameter.fed1) * (self.parameter.fed2r / 100)
-        #     federal_income = self.parameter.fed1
-        # if federal_income > 0:
-        #     federal_taxes += federal_income * (self.parameter.fed1r / 100)
-
-        # return fica_taxes + state_taxes + federal_taxes
     # only pertaining to non-owned assets 
     def add_investment(self):
         print("-------------------------------------------")
@@ -198,6 +138,9 @@ class Simulation:
 
     # TODO - implement
     def change_salary(self):
+        pass
+
+    def calculate_taxes(self):
         pass
 
     def fc(self, number):
