@@ -76,9 +76,9 @@ class Taxes:
     __NIIT_RATE = 3.8
 
     @staticmethod
-    def __federal_earned_income_tax(earned_income, deduction, exemption):
+    def __federal_earned_income_tax(earned_income, deduction, exemption, investment_income):
         tax = 0
-        income = earned_income - exemption - deduction
+        income = earned_income + investment_income - exemption - deduction
 
         # bracket 7
         if income > Taxes.__FEDERAL_BRACKET_7:
@@ -112,9 +112,9 @@ class Taxes:
         return tax
     
     @staticmethod
-    def __state_tax(earned_income, ltcg, deduction):
+    def __state_tax(earned_income, ltcg, deduction, investment_income):
         tax = 0
-        income = earned_income + ltcg - Taxes.__STATE_EXEMPTION - deduction
+        income = earned_income + ltcg + investment_income - Taxes.__STATE_EXEMPTION - deduction
 
         # bracket 7
         if income > Taxes.__STATE_BRACKET_7:
@@ -177,9 +177,9 @@ class Taxes:
         return tax
     
     @staticmethod
-    def __federal_ltcg_tax(earned_income, ltcg, deduction, exemption):
+    def __federal_ltcg_tax(earned_income, ltcg, deduction, exemption, investment_income):
         tax = 0
-        income = earned_income + ltcg -exemption - deduction
+        income = earned_income + ltcg + investment_income -exemption - deduction
 
         # bracket 3
         if income > Taxes.__FEDERAL_LTCG_BRACKET_3:
@@ -203,23 +203,21 @@ class Taxes:
         return tax
 
     @staticmethod
-    def __niit_tax(earned_income, investment_income):
+    def __niit_tax(earned_income, ltcg, investment_income):
         """TODO
         """
 
         tax = 0
-        income = earned_income + investment_income
+        net_investment_income = ltcg + investment_income
+        income = earned_income + net_investment_income
 
-        niit_applicable = min(investment_income, max(0, income - Taxes.__NIIT_THRESHOLD))
+        niit_applicable = min(net_investment_income, max(0, income - Taxes.__NIIT_THRESHOLD))
         tax += niit_applicable * (Taxes.__NIIT_RATE / 100)
 
         return tax
     
     @staticmethod
-    def calculate_tax(earned_income, itemized_deduction, ltcg, current_salt_deduction):
-        # DEBUG - save original itemized deduction
-        debug_itemized = itemized_deduction
-
+    def calculate_tax(earned_income, itemized_deduction, ltcg, current_salt_deduction, investment_income):
         # to determine whether a standard or itemized deduction would be better we run both and choose the lesser
 
         # ITEMIZED DEDUCTION
@@ -230,23 +228,34 @@ class Taxes:
         itemized_fica = Taxes.__fica_tax(earned_income)
         itemized_tax += itemized_fica
 
+        # DEBUG - save original information
+        d_i_d_s = itemized_deduction
+
         # state tax, which are deductable up to salt cap, and apply to capital gains as well
-        itemized_state = Taxes.__state_tax(earned_income, ltcg, itemized_deduction)
+        itemized_state = Taxes.__state_tax(earned_income, ltcg, itemized_deduction, investment_income)
         itemized_deduction += min(itemized_state, Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction)
         itemized_tax += itemized_state
 
+        # DEBUG - save original information
+        d_i_d_f = itemized_deduction
+        d_i_e_f = itemized_exemption
+
         # federal earned income tax
-        itemized_federal = Taxes.__federal_earned_income_tax(earned_income, itemized_deduction, itemized_exemption)
+        itemized_federal = Taxes.__federal_earned_income_tax(earned_income, itemized_deduction, itemized_exemption, investment_income)
         itemized_deduction = max(0, itemized_deduction - earned_income)
         itemized_exemption = max(0, itemized_exemption - earned_income)
         itemized_tax += itemized_federal
 
+        # DEBUG - save original information
+        d_i_d_l = itemized_deduction
+        d_i_e_l = itemized_exemption
+
         # federal capital gains tax on top of earned income
-        itemized_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, itemized_deduction, itemized_exemption)
+        itemized_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, itemized_deduction, itemized_exemption, investment_income)
         itemized_tax += itemized_ltcg
         
         # niit tax apply seperately to investment income
-        itemized_niit = Taxes.__niit_tax(earned_income, ltcg)
+        itemized_niit = Taxes.__niit_tax(earned_income, ltcg, investment_income)
         itemized_tax += itemized_niit
 
         # STANDARD DEDUCTION
@@ -259,21 +268,25 @@ class Taxes:
         standard_tax += standard_fica
 
         # state tax, which are deductable up to salt cap, and apply to capital gains as well
-        standard_state = Taxes.__state_tax(earned_income, ltcg, Taxes.__STATE_DEDUCTION)
+        standard_state = Taxes.__state_tax(earned_income, ltcg, Taxes.__STATE_DEDUCTION, investment_income)
         standard_tax += standard_state
 
         # federal earned income tax
-        standard_federal = Taxes.__federal_earned_income_tax(earned_income, standard_deduction, standard_exemption)
+        standard_federal = Taxes.__federal_earned_income_tax(earned_income, standard_deduction, standard_exemption, investment_income)
         standard_deduction = max(0, standard_deduction - earned_income)
         standard_exemption = max(0, standard_exemption - earned_income)
         standard_tax += standard_federal
 
+        # DEBUG - save original information
+        d_s_d_l = standard_deduction
+        d_s_e_l = standard_exemption
+
         # federal capital gains tax on top of earned income
-        standard_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, standard_deduction, standard_exemption)
+        standard_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, standard_deduction, standard_exemption, investment_income)
         standard_tax += standard_ltcg
 
         # niit tax apply seperately to investment income
-        standard_niit = Taxes.__niit_tax(earned_income, ltcg)
+        standard_niit = Taxes.__niit_tax(earned_income, ltcg, investment_income)
         standard_tax += standard_niit
 
         # DEBUG - print tax breakdown
@@ -287,8 +300,16 @@ class Taxes:
                 ltcg_tax = itemized_ltcg
                 niit_tax = itemized_niit
 
-                state_earned = Taxes.__state_tax(earned_income, 0, debug_itemized)
-                state_ltcg = state_tax - state_earned
+                state_e_i = Taxes.__state_tax(earned_income, 0, d_i_d_s, investment_income)
+                state_earned = Taxes.__state_tax(earned_income, 0, d_i_d_s, 0)
+                state_investment = state_e_i - state_earned
+                state_ltcg = state_tax - state_e_i
+
+                federal_earned = Taxes.__federal_earned_income_tax(earned_income, d_i_d_f, d_i_e_f, 0)
+                federal_investment = federal_tax - federal_earned
+
+                niit_investment = Taxes.__niit_tax(earned_income, 0, investment_income)
+                niit_ltcg = niit_tax - niit_investment
             # case standard
             else:
                 federal_tax = standard_federal
@@ -297,15 +318,36 @@ class Taxes:
                 ltcg_tax = standard_ltcg
                 niit_tax = standard_niit
 
-                state_earned = Taxes.__state_tax(earned_income, 0, Taxes.__STATE_DEDUCTION)
-                state_ltcg = state_tax - state_earned
+                state_e_i = Taxes.__state_tax(earned_income, 0, Taxes.__STATE_DEDUCTION, investment_income)
+                state_earned = Taxes.__state_tax(earned_income, 0, Taxes.__STATE_DEDUCTION, 0)
+                state_investment = state_e_i - state_earned
+                state_ltcg = state_tax - state_e_i
+
+                federal_earned = Taxes.__federal_earned_income_tax(earned_income, Taxes.__FEDERAL_DEDUCTION, Taxes.__FEDERAL_EXEMPTION, 0)
+                federal_investment = federal_tax - federal_earned
+
+                niit_investment = Taxes.__niit_tax(earned_income, 0, investment_income)
+                niit_ltcg = niit_tax - niit_investment
 
             print("Earned Income:")
-            print(f"   Federal - {federal_tax}")
-            print(f"   FICA    - {fica_tax}")
+            print(f"   Federal - {federal_earned}")
             print(f"   State   - {state_earned}")
+            print(f"   FICA    - {fica_tax}")
+            print(f"   Total   - {federal_earned + state_earned + fica_tax}")
+            print("Investment Income:")
+            print(f"   Federal - {federal_investment}")
+            print(f"   State   - {state_investment}")
+            print(f"   NIIT    - {niit_investment}")
+            print(f"   Total   - {federal_investment + state_investment + niit_investment}")
             print("Long Term Capital Gains:")
-            # DEBUG - rm, change this line back after done debugging with online calculator
-            print(f"   LTCG    - {ltcg_tax + niit_tax}")
+            print(f"   LTCG    - {ltcg_tax}")
             print(f"   State   - {state_ltcg}")
+            print(f"   NIIT    - {niit_ltcg}")
+            print(f"   Total   - {ltcg_tax + state_ltcg + niit_ltcg}")
+            print("Summary:")
+            print(f"   Federal - {federal_tax}")
+            print(f"   State   - {state_tax}")
+            print(f"   LTCG    - {ltcg_tax}")
+            print(f"   FICA    - {fica_tax}")
             print(f"   NIIT    - {niit_tax}")
+            print(f"   Total   - {federal_tax + state_tax + ltcg_tax + fica_tax + niit_tax}")
