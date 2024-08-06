@@ -1,5 +1,4 @@
-#from GreenSeer import DEBUG_TOGGLE
-DEBUG_TOGGLE = 1
+from GreenSeer import DEBUG_TOGGLE
 
 class Taxes:
     """The Taxes class is responcible for handling all tax settings and methods.
@@ -70,205 +69,243 @@ class Taxes:
     __FEDERAL_LTCG_RATE_1 = 0
     __FEDERAL_LTCG_RATE_2 = 15
     __FEDERAL_LTCG_RATE_3 = 20
-    # New Jersey taxes capital gains as normal income so they have no brackets
+    # New Jersey tax capital gains as normal income so they have no brackets
 
     # if you make over 200,000 a year you have to pay 3.8 on all investment gains above that
     __NIIT_THRESHOLD = 200_000
     __NIIT_RATE = 3.8
 
     @staticmethod
-    def __federal_earned_income_tax(earned_income, deduction):
-        taxes = 0
-        income = earned_income
-
-        # determine and apply deduction and exemption
-        income -= Taxes.__FEDERAL_EXEMPTION
-        income -= deduction
+    def __federal_earned_income_tax(earned_income, deduction, exemption):
+        tax = 0
+        income = earned_income - exemption - deduction
 
         # bracket 7
         if income > Taxes.__FEDERAL_BRACKET_7:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_7) * (Taxes.__FEDERAL_RATE_7 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_7) * (Taxes.__FEDERAL_RATE_7 / 100)
             income = Taxes.__FEDERAL_BRACKET_7
         # bracket 6
         if income > Taxes.__FEDERAL_BRACKET_6:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_6) * (Taxes.__FEDERAL_RATE_6 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_6) * (Taxes.__FEDERAL_RATE_6 / 100)
             income = Taxes.__FEDERAL_BRACKET_6
         # bracket 5
         if income > Taxes.__FEDERAL_BRACKET_5:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_5) * (Taxes.__FEDERAL_RATE_5 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_5) * (Taxes.__FEDERAL_RATE_5 / 100)
             income = Taxes.__FEDERAL_BRACKET_5
         # bracket 4
         if income > Taxes.__FEDERAL_BRACKET_4:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_4) * (Taxes.__FEDERAL_RATE_4 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_4) * (Taxes.__FEDERAL_RATE_4 / 100)
             income = Taxes.__FEDERAL_BRACKET_4
         # bracket 3
         if income > Taxes.__FEDERAL_BRACKET_3:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_3) * (Taxes.__FEDERAL_RATE_3 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_3) * (Taxes.__FEDERAL_RATE_3 / 100)
             income = Taxes.__FEDERAL_BRACKET_3
         # bracket 2
         if income > Taxes.__FEDERAL_BRACKET_2:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_2) * (Taxes.__FEDERAL_RATE_2 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_2) * (Taxes.__FEDERAL_RATE_2 / 100)
             income = Taxes.__FEDERAL_BRACKET_2
         # bracket 1
         if income > Taxes.__FEDERAL_BRACKET_1:
-            taxes += (income - Taxes.__FEDERAL_BRACKET_1) * (Taxes.__FEDERAL_RATE_1 / 100)
+            tax += (income - Taxes.__FEDERAL_BRACKET_1) * (Taxes.__FEDERAL_RATE_1 / 100)
             income = Taxes.__FEDERAL_BRACKET_1
 
-        return taxes
+        return tax
     
     @staticmethod
     def __state_tax(earned_income, ltcg, deduction):
-        taxes = 0
-        income = earned_income + ltcg
-
-        # apply deductions and state exemption
-        income -= Taxes.__STATE_EXEMPTION
-        income -= deduction
+        tax = 0
+        income = earned_income + ltcg - Taxes.__STATE_EXEMPTION - deduction
 
         # bracket 7
         if income > Taxes.__STATE_BRACKET_7:
-            taxes += (income - Taxes.__STATE_BRACKET_7) * (Taxes.__STATE_RATE_7 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_7) * (Taxes.__STATE_RATE_7 / 100)
             income = Taxes.__STATE_BRACKET_7
         # bracket 6
         if income > Taxes.__STATE_BRACKET_6:
-            taxes += (income - Taxes.__STATE_BRACKET_6) * (Taxes.__STATE_RATE_6 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_6) * (Taxes.__STATE_RATE_6 / 100)
             income = Taxes.__STATE_BRACKET_6
         # bracket 5
         if income > Taxes.__STATE_BRACKET_5:
-            taxes += (income - Taxes.__STATE_BRACKET_5) * (Taxes.__STATE_RATE_5 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_5) * (Taxes.__STATE_RATE_5 / 100)
             income = Taxes.__STATE_BRACKET_5
         # bracket 4
         if income > Taxes.__STATE_BRACKET_4:
-            taxes += (income - Taxes.__STATE_BRACKET_4) * (Taxes.__STATE_RATE_4 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_4) * (Taxes.__STATE_RATE_4 / 100)
             income = Taxes.__STATE_BRACKET_4
         # bracket 3
         if income > Taxes.__STATE_BRACKET_3:
-            taxes += (income - Taxes.__STATE_BRACKET_3) * (Taxes.__STATE_RATE_3 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_3) * (Taxes.__STATE_RATE_3 / 100)
             income = Taxes.__STATE_BRACKET_3
         # bracket 2
         if income > Taxes.__STATE_BRACKET_2:
-            taxes += (income - Taxes.__STATE_BRACKET_2) * (Taxes.__STATE_RATE_2 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_2) * (Taxes.__STATE_RATE_2 / 100)
             income = Taxes.__STATE_BRACKET_2
         # bracket 1
         if income > Taxes.__STATE_BRACKET_1:
-            taxes += (income - Taxes.__STATE_BRACKET_1) * (Taxes.__STATE_RATE_1 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_1) * (Taxes.__STATE_RATE_1 / 100)
             income = Taxes.__STATE_BRACKET_1
 
-        return taxes
+        return tax
     
     @staticmethod
     def __fica_tax(earned_income):
-        taxes = 0
+        tax = 0
         income = earned_income
 
-        # apply social taxes
+        # apply social tax
         temp_income = income
         # bracket 2
         if temp_income > Taxes.__SOCIAL_BRACKET_2:
-            taxes += (temp_income - Taxes.__SOCIAL_BRACKET_2) * (Taxes.__SOCIAL_RATE_2 / 100)
+            tax += (temp_income - Taxes.__SOCIAL_BRACKET_2) * (Taxes.__SOCIAL_RATE_2 / 100)
             temp_income = Taxes.__SOCIAL_BRACKET_2
-        # bracket 2
+        # bracket 1
         if temp_income > Taxes.__SOCIAL_BRACKET_1:
-            taxes += (temp_income - Taxes.__SOCIAL_BRACKET_1) * (Taxes.__SOCIAL_RATE_1 / 100)
+            tax += (temp_income - Taxes.__SOCIAL_BRACKET_1) * (Taxes.__SOCIAL_RATE_1 / 100)
             temp_income = Taxes.__SOCIAL_BRACKET_1
 
-        # apply medicare taxes
+        # apply medicare tax
         temp_income = income
         # bracket 2
         if temp_income > Taxes.__MEDICARE_BRACKET_2:
-            taxes += (temp_income - Taxes.__MEDICARE_BRACKET_2) * (Taxes.__MEDICARE_RATE_2 / 100)
+            tax += (temp_income - Taxes.__MEDICARE_BRACKET_2) * (Taxes.__MEDICARE_RATE_2 / 100)
             temp_income = Taxes.__MEDICARE_BRACKET_2
-        # bracket 2
+        # bracket 1
         if temp_income > Taxes.__MEDICARE_BRACKET_1:
-            taxes += (temp_income - Taxes.__MEDICARE_BRACKET_1) * (Taxes.__MEDICARE_RATE_1 / 100)
+            tax += (temp_income - Taxes.__MEDICARE_BRACKET_1) * (Taxes.__MEDICARE_RATE_1 / 100)
             temp_income = Taxes.__MEDICARE_BRACKET_1
 
-        return taxes
+        return tax
     
-    # CURSOR - doesnt work, refactor Taxes to use min and max methods
     @staticmethod
-    def __federal_ltcg_tax(earned_income, ltcg, deduction):
-        taxes = 0
-        income = earned_income + ltcg
-
-        income -= Taxes.__FEDERAL_EXEMPTION
-        income -= deduction
+    def __federal_ltcg_tax(earned_income, ltcg, deduction, exemption):
+        tax = 0
+        income = earned_income + ltcg -exemption - deduction
 
         # bracket 3
         if income > Taxes.__FEDERAL_LTCG_BRACKET_3:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_3 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_3 else ltcg
-            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_3 / 100)
+            ltcg_above = min(ltcg, income - Taxes.__FEDERAL_LTCG_BRACKET_3)
+            tax += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_3 / 100)
             ltcg -= ltcg_above
             income -= ltcg_above
         # bracket 2
         if income > Taxes.__FEDERAL_LTCG_BRACKET_2:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_2 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_2 else ltcg
-            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_2 / 100)
+            ltcg_above = min(ltcg, income - Taxes.__FEDERAL_LTCG_BRACKET_2)
+            tax += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_2 / 100)
             ltcg -= ltcg_above
             income -= ltcg_above
         # bracket 1
         if income > Taxes.__FEDERAL_LTCG_BRACKET_1:
-            ltcg_above = income - Taxes.__FEDERAL_LTCG_BRACKET_1 if ltcg >= income - Taxes.__FEDERAL_LTCG_BRACKET_1 else ltcg
-            taxes += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_1 / 100)
+            ltcg_above = min(ltcg, income - Taxes.__FEDERAL_LTCG_BRACKET_1)
+            tax += ltcg_above * (Taxes.__FEDERAL_LTCG_RATE_1 / 100)
             ltcg -= ltcg_above
             income -= ltcg_above
 
-        return taxes
+        return tax
 
     @staticmethod
-    def __niit_tax(earned_income, ltcg):
+    def __niit_tax(earned_income, investment_income):
         """TODO
         """
 
-        taxes = 0
-        income = earned_income + ltcg
+        tax = 0
+        income = earned_income + investment_income
 
-        niit_applicable = ltcg if earned_income >= Taxes.__NIIT_THRESHOLD else income - Taxes.__NIIT_THRESHOLD
-        taxes += niit_applicable * (Taxes.__NIIT_RATE / 100)
+        niit_applicable = min(investment_income, max(0, income - Taxes.__NIIT_THRESHOLD))
+        tax += niit_applicable * (Taxes.__NIIT_RATE / 100)
 
-        return taxes
+        return tax
     
     @staticmethod
-    def calculate_tax(earned_income, ltcg, itemized_deduction, current_salt_deduction):
-        """TODO
-        """
+    def calculate_tax(earned_income, itemized_deduction, ltcg, current_salt_deduction):
+        # DEBUG - save original itemized deduction
+        debug_itemized = itemized_deduction
 
         # to determine whether a standard or itemized deduction would be better we run both and choose the lesser
 
-        itemized_taxes = 0
+        # ITEMIZED DEDUCTION
+        itemized_tax = 0
+        itemized_exemption = Taxes.__FEDERAL_EXEMPTION
 
-        # fica taxes on income earned from a job
-        itemized_taxes += Taxes.__fica_tax(earned_income)
+        # fica tax on income earned from a job
+        itemized_fica = Taxes.__fica_tax(earned_income)
+        itemized_tax += itemized_fica
 
-        # state taxes, which are deductable up to salt cap, and apply to capital gains as well
-        state_taxes = Taxes.__state_tax(earned_income, ltcg, itemized_deduction)
-        itemized_deduction += state_taxes if current_salt_deduction + itemized_deduction <= Taxes.__SALT_DEDUCTION_CAP else Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction
-        itemized_taxes += state_taxes
+        # state tax, which are deductable up to salt cap, and apply to capital gains as well
+        itemized_state = Taxes.__state_tax(earned_income, ltcg, itemized_deduction)
+        itemized_deduction += min(itemized_state, Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction)
+        itemized_tax += itemized_state
 
         # federal earned income tax
-        itemized_taxes += Taxes.__federal_earned_income_tax(earned_income, itemized_deduction)
-        itemized_deduction = 0 if itemized_deduction <= earned_income else itemized_deduction - earned_income
+        itemized_federal = Taxes.__federal_earned_income_tax(earned_income, itemized_deduction, itemized_exemption)
+        itemized_deduction = max(0, itemized_deduction - earned_income)
+        itemized_exemption = max(0, itemized_exemption - earned_income)
+        itemized_tax += itemized_federal
 
         # federal capital gains tax on top of earned income
-        itemized_taxes += Taxes.__federal_ltcg_tax(earned_income, ltcg, itemized_deduction)
-        itemized_taxes += Taxes.__niit_tax(earned_income, ltcg)
+        itemized_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, itemized_deduction, itemized_exemption)
+        itemized_tax += itemized_ltcg
+        
+        # niit tax apply seperately to investment income
+        itemized_niit = Taxes.__niit_tax(earned_income, ltcg)
+        itemized_tax += itemized_niit
 
-        standard_taxes = 0
+        # STANDARD DEDUCTION
+        standard_tax = 0
         standard_deduction = Taxes.__FEDERAL_DEDUCTION
+        standard_exemption = Taxes.__FEDERAL_EXEMPTION
 
-        # fica taxes on income earned from a job
-        standard_taxes += Taxes.__fica_tax(earned_income)
+        # fica tax on income earned from a job
+        standard_fica = Taxes.__fica_tax(earned_income)
+        standard_tax += standard_fica
 
-        # state taxes, which are deductable up to salt cap, and apply to capital gains as well
-        state_taxes = Taxes.__state_tax(earned_income, ltcg, standard_deduction)
-        standard_taxes += state_taxes
+        # state tax, which are deductable up to salt cap, and apply to capital gains as well
+        standard_state = Taxes.__state_tax(earned_income, ltcg, Taxes.__STATE_DEDUCTION)
+        standard_tax += standard_state
 
         # federal earned income tax
-        standard_taxes += Taxes.__federal_earned_income_tax(earned_income, standard_deduction)
-        standard_deduction = 0 if standard_deduction <= earned_income else standard_deduction - earned_income
+        standard_federal = Taxes.__federal_earned_income_tax(earned_income, standard_deduction, standard_exemption)
+        standard_deduction = max(0, standard_deduction - earned_income)
+        standard_exemption = max(0, standard_exemption - earned_income)
+        standard_tax += standard_federal
 
         # federal capital gains tax on top of earned income
-        standard_taxes += Taxes.__federal_ltcg_tax(earned_income, ltcg, standard_deduction)
-        standard_taxes += Taxes.__niit_tax(earned_income, ltcg)
+        standard_ltcg = Taxes.__federal_ltcg_tax(earned_income, ltcg, standard_deduction, standard_exemption)
+        standard_tax += standard_ltcg
 
-        return itemized_taxes if itemized_taxes < standard_taxes else standard_taxes
+        # niit tax apply seperately to investment income
+        standard_niit = Taxes.__niit_tax(earned_income, ltcg)
+        standard_tax += standard_niit
+
+        # DEBUG - print tax breakdown
+        if DEBUG_TOGGLE == 1:
+
+            # case itemized
+            if itemized_tax < standard_tax:
+                federal_tax = itemized_federal
+                state_tax = itemized_state
+                fica_tax = itemized_fica
+                ltcg_tax = itemized_ltcg
+                niit_tax = itemized_niit
+
+                state_earned = Taxes.__state_tax(earned_income, 0, debug_itemized)
+                state_ltcg = state_tax - state_earned
+            # case standard
+            else:
+                federal_tax = standard_federal
+                state_tax = standard_state
+                fica_tax = standard_fica
+                ltcg_tax = standard_ltcg
+                niit_tax = standard_niit
+
+                state_earned = Taxes.__state_tax(earned_income, 0, Taxes.__STATE_DEDUCTION)
+                state_ltcg = state_tax - state_earned
+
+            print("Earned Income:")
+            print(f"   Federal - {federal_tax}")
+            print(f"   FICA    - {fica_tax}")
+            print(f"   State   - {state_earned}")
+            print("Long Term Capital Gains:")
+            # DEBUG - rm, change this line back after done debugging with online calculator
+            print(f"   LTCG    - {ltcg_tax + niit_tax}")
+            print(f"   State   - {state_ltcg}")
+            print(f"   NIIT    - {niit_tax}")
