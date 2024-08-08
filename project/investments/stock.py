@@ -1,34 +1,24 @@
 import common
 from investment import Investment
 
-# TODO - handling selling long term and short term capital gains
 class Stock(Investment):
-    def __init__(self, name, value, appreciation, dividend, expense_ratio):
-        super().__init__(name)
-        self.value = value
+    """TODO
+    """
+
+    def __init__(self, name, period, value, appreciation, dividend, expense_ratio):
+        super().__init__(name, period, value)
         self.appreciation = appreciation
         self.dividend = dividend
         self.expense_ratio = expense_ratio
-        self.purchase_price = value
-        self.realized_gains = 0
-    
-    def simulate_month(self, month):
-        self.investment_income = 0
-        self.net_worth = 0
 
-        # happens every month
-        self.value *= (1 + self.appreciation / 100) ** (1 / 12)
+    def handle_month(self) -> None:
+        # add appreciation to stocks value
+        self.total_value *= (1 + self.appreciation / 100) ** (1 / 12)
 
-        # happens every quarter
-        if month % 3 == 0:
-            self.investment_income += self.value * (self.dividend / 100) / 4
-            self.realized_gains += self.investment_income
+    def handle_quarter(self) -> None:
+        # stock pays out dividend giving investment income with an equivalent drop in value
+        self.period_investment_income += self.total_value * (self.dividend / 100) / 4
 
-        # happens every year
-        if month % 12 == 0:
-            self.value *= (1 - self.expense_ratio / 100)
-
-        self.net_worth = self.value
-
-    def __str__(self):
-        return f"{self.__class__.__name__}: {self.name}   Value: {self.fc(self.value)}   Unrealized Gains: {self.fc(self.value - self.purchase_price)}   Realized Gains: {self.fc(self.realized_gains)}"
+    def handle_year(self) -> None:
+        # stock pays expense ratio based on value at the end of the year
+        self.total_value *= (1 - self.expense_ratio / 100)

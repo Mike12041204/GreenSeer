@@ -2,16 +2,19 @@ import common
 from investments.stock import Stock
 from investor import Investor
 
-# Simulation class is repsonsible for handling input and output and triggering events.
-# The class should not perform complex arithmetic
 class Simulation:
+    """Simulation class is repsonsible for handling input and triggering events.
+    
+    The class also keeps track of the enviroment. The class should not perform complex arithmetic.
+    """
+    
     def __init__(self):
-        self.month = 1
+        self.period = 1
         name = input("Enter Investor Name: ")
         self.investor = Investor(name)
         print()
 
-    def simulate(self):
+    def simulate(self) -> None:
         print("Info:")
         print("Enter all numbers as percentages.")
         print("Consider all parameters as they apply yearly.")
@@ -22,7 +25,7 @@ class Simulation:
 
         while running:
             print("-------------------------------------------")
-            print(f"Investor: {self.investor.name}   Month: {self.month}")
+            print(f"Investor: {self.investor.name}   Period: {self.period}")
             if skip == 0:
                 print("-------------------------------------------")
                 print("Menu:")
@@ -35,7 +38,7 @@ class Simulation:
                 print("-------------------------------------------")
 
             while skip == 0:
-                selection = -1
+                selection = int(input("Make a Selection: "))
                 while selection < 0 or selection > 5:
                     selection = int(input("Make a Selection: "))
                 
@@ -58,20 +61,20 @@ class Simulation:
 
             print("-------------------------------------------")
             self.simulate_month()
-            print(f"Net Worth: {common.fa(self.investor.net_worth)}   Month Income: {common.fa(self.investor.month_profit)}")
+            print(f"Net Worth: {common.fa(self.investor.net_worth)}   Period Income: {common.fa(self.investor.month_profit)}")
             print("-------------------------------------------")
             print()
             print()
             print()
     
-    def simulate_month(self):
+    def simulate_month(self) -> None:
         # reset monthly values
         self.investor.net_worth = 0
         self.investor.month_profit = 0
 
         # simulate and track investments for the month
         for investment in self.investor.investments:
-            investment.simulate_month(self.month)
+            investment.simulate_month(self.period)
             print(f"{investment}")
 
             # keep track of changed income and net worth
@@ -80,10 +83,10 @@ class Simulation:
             self.investor.cash += investment.investment_income
             self.investor.net_worth += investment.net_worth
 
-        self.month += 1
+        self.period += 1
     
     # only pertaining to non-owned assets 
-    def add_investment(self):
+    def add_investment(self) -> None:
         print("-------------------------------------------")
         print("Menu:")
         print("0: End Selection")
@@ -91,7 +94,7 @@ class Simulation:
         print("-------------------------------------------")
 
         while True:
-            selection = -1
+            selection = int(input("Make a Selection: "))
             while selection < 0 or selection > 1:
                 selection = int(input("Make a Selection: "))
             
@@ -104,7 +107,7 @@ class Simulation:
         print("-------------------------------------------")
 
  
-    def add_stock(self):
+    def add_stock(self) -> None:
         name = input("Enter the Name: ")
         while name in self.investor.investment_names:
             name = input("Enter a Name: ")
@@ -126,16 +129,16 @@ class Simulation:
         while expense_ratio < 0 or expense_ratio > 100:
             expense_ratio = float(input("Enter a Expense Ratio: "))
 
-        stock = Stock(name, value, appreciation, dividend, expense_ratio)
+        stock = Stock(name, self.period, value, appreciation, dividend, expense_ratio)
 
         self.investor.investments.append(stock)
 
 
     # TODO - implement
     # involves selling, refinancing, or other actions pertaining to owned assets
-    def manage_investment(self):
+    def manage_investment(self) -> None:
         pass
 
     # TODO - implement
-    def change_salary(self):
+    def change_salary(self) -> None:
         pass
