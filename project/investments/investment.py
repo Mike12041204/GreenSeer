@@ -6,7 +6,7 @@ class Investment(ABC):
     """TODO
     """
     
-    def __init__(self, name, period, value):
+    def __init__(self, name, period, value, liability):
         self.name = name
         # variables to track investment progress
         self.inception_period = period
@@ -17,8 +17,8 @@ class Investment(ABC):
         self.period_expense = 0
         self.period_deduction = 0
         # these values are overall and do not reset every period
-        self.total_value = 0
-        self.total_liability = 0
+        self.total_value = value
+        self.total_liability = liability
     
     def simulate_period(self, period) -> Tuple[float, float, float, float, float, float]:
         """Simulates all happenings of the investment for a single period.
@@ -83,8 +83,8 @@ class Investment(ABC):
     def __str__(self) -> str:
         """Displays the period return tuple as a formatted string"""
 
-        return (f"Income: {self.period_investment_income}   LTCG: {self.period_ltcg}   " +
-                f"Expenses:{self.period_expense}\nValue: {self.total_value}   Liability: " +
+        return (f"Investment Income: {self.period_investment_income}   LTCG: {self.period_ltcg} " +
+                f"  Expenses:{self.period_expense}\nValue: {self.total_value}   Liability: " +
                 f"{self.total_liability}   Deduction: {self.period_deduction}\nNet Worth: " +
                 f"{self.total_value - self.total_liability}   Profit: " +
                 f"{self.period_investment_income + self.period_ltcg - self.period_expenses}")

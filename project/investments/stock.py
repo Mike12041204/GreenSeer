@@ -1,12 +1,12 @@
 import common
-from investment import Investment
+from investments.investment import Investment
 
 class Stock(Investment):
     """TODO
     """
 
-    def __init__(self, name, period, value, appreciation, dividend, expense_ratio):
-        super().__init__(name, period, value)
+    def __init__(self, name, period, value, liability, appreciation, dividend, expense_ratio):
+        super().__init__(name, period, value, liability)
         self.appreciation = appreciation
         self.dividend = dividend
         self.expense_ratio = expense_ratio
