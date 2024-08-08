@@ -236,9 +236,6 @@ class Taxes:
         # state tax, which are deductable up to salt cap, and apply to capital gains as well
         itemized_state = Taxes.__state_tax(earned_income, ltcg, itemized_deduction, investment_income)
         itemized_deduction += min(itemized_state, Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction)
-        print(itemized_deduction)
-        print(current_salt_deduction)
-        print(itemized_state)
         itemized_tax += itemized_state
 
         # DEBUG - save original information
