@@ -1,4 +1,5 @@
-from GreenSeer import DEBUG_TOGGLE
+import common
+from decimal import Decimal
 
 class Taxes:
     """The Taxes class is responcible for handling all tax settings and methods.
@@ -24,20 +25,21 @@ class Taxes:
     __FEDERAL_RATE_7 = 37
 
     # using New Jersey tax brackets
-    __STATE_BRACKET_1 = 0
-    __STATE_BRACKET_2 = 20_000
-    __STATE_BRACKET_3 = 35_000
-    __STATE_BRACKET_4 = 40_000
-    __STATE_BRACKET_5 = 75_000
-    __STATE_BRACKET_6 = 500_000
-    __STATE_BRACKET_7 = 1_000_000
-    __STATE_RATE_1 = 1.4
-    __STATE_RATE_2 = 1.75
-    __STATE_RATE_3 = 3.5
-    __STATE_RATE_4 = 5.525
-    __STATE_RATE_5 = 6.37
-    __STATE_RATE_6 = 8.97
-    __STATE_RATE_7 = 10.75
+    __STATE_BRACKET_1 = Decimal('0')
+    __STATE_BRACKET_2 = Decimal('20_000')
+    __STATE_BRACKET_3 = Decimal('35_000')
+    __STATE_BRACKET_4 = Decimal('40_000')
+    __STATE_BRACKET_5 = Decimal('75_000')
+    __STATE_BRACKET_6 = Decimal('500_000')
+    __STATE_BRACKET_7 = Decimal('1_000_000')
+    # using Decimal class for state tax calculation for increased precision
+    __STATE_RATE_1 = Decimal('1.4')
+    __STATE_RATE_2 = Decimal('1.75')
+    __STATE_RATE_3 = Decimal('3.5')
+    __STATE_RATE_4 = Decimal('5.525')
+    __STATE_RATE_5 = Decimal('6.37')
+    __STATE_RATE_6 = Decimal('8.97')
+    __STATE_RATE_7 = Decimal('10.75')
 
     # social security is taxed at 6.2% up to 160,200 then no more
     __SOCIAL_BRACKET_1 = 0
@@ -53,7 +55,7 @@ class Taxes:
 
     # New Jersey allows an exemption of 1000 in income from taxes, the federal governemnt used to allow this but has since gotten rid of it
     __FEDERAL_EXEMPTION = 0
-    __STATE_EXEMPTION = 1_000
+    __STATE_EXEMPTION = Decimal('1_000')
 
     # the federal government has a standard deduction if the indivdual does not opt for an itemized deduction, New Jersey has no standard deduction one must itemize if any
     __FEDERAL_DEDUCTION = 13_850
@@ -113,39 +115,39 @@ class Taxes:
     
     @staticmethod
     def __state_tax(earned_income, ltcg, deduction, investment_income):
-        tax = 0
-        income = earned_income + ltcg + investment_income - Taxes.__STATE_EXEMPTION - deduction
+        tax = Decimal('0')
+        income = Decimal(earned_income) + Decimal(ltcg) + Decimal(investment_income) - Taxes.__STATE_EXEMPTION - Decimal(deduction)
 
         # bracket 7
         if income > Taxes.__STATE_BRACKET_7:
-            tax += (income - Taxes.__STATE_BRACKET_7) * (Taxes.__STATE_RATE_7 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_7) * (Taxes.__STATE_RATE_7 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_7
         # bracket 6
         if income > Taxes.__STATE_BRACKET_6:
-            tax += (income - Taxes.__STATE_BRACKET_6) * (Taxes.__STATE_RATE_6 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_6) * (Taxes.__STATE_RATE_6 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_6
         # bracket 5
         if income > Taxes.__STATE_BRACKET_5:
-            tax += (income - Taxes.__STATE_BRACKET_5) * (Taxes.__STATE_RATE_5 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_5) * (Taxes.__STATE_RATE_5 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_5
         # bracket 4
         if income > Taxes.__STATE_BRACKET_4:
-            tax += (income - Taxes.__STATE_BRACKET_4) * (Taxes.__STATE_RATE_4 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_4) * (Taxes.__STATE_RATE_4 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_4
         # bracket 3
         if income > Taxes.__STATE_BRACKET_3:
-            tax += (income - Taxes.__STATE_BRACKET_3) * (Taxes.__STATE_RATE_3 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_3) * (Taxes.__STATE_RATE_3 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_3
         # bracket 2
         if income > Taxes.__STATE_BRACKET_2:
-            tax += (income - Taxes.__STATE_BRACKET_2) * (Taxes.__STATE_RATE_2 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_2) * (Taxes.__STATE_RATE_2 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_2
         # bracket 1
         if income > Taxes.__STATE_BRACKET_1:
-            tax += (income - Taxes.__STATE_BRACKET_1) * (Taxes.__STATE_RATE_1 / 100)
+            tax += (income - Taxes.__STATE_BRACKET_1) * (Taxes.__STATE_RATE_1 / Decimal('100'))
             income = Taxes.__STATE_BRACKET_1
 
-        return tax
+        return float(tax)
     
     @staticmethod
     def __fica_tax(earned_income):
@@ -234,6 +236,9 @@ class Taxes:
         # state tax, which are deductable up to salt cap, and apply to capital gains as well
         itemized_state = Taxes.__state_tax(earned_income, ltcg, itemized_deduction, investment_income)
         itemized_deduction += min(itemized_state, Taxes.__SALT_DEDUCTION_CAP - current_salt_deduction)
+        print(itemized_deduction)
+        print(current_salt_deduction)
+        print(itemized_state)
         itemized_tax += itemized_state
 
         # DEBUG - save original information
@@ -290,10 +295,11 @@ class Taxes:
         standard_tax += standard_niit
 
         # DEBUG - print tax breakdown
-        if DEBUG_TOGGLE == 1:
+        if common.DEBUG_TOGGLE == 1:
 
             # case itemized
             if itemized_tax < standard_tax:
+                deduction = 'Itemized'
                 federal_tax = itemized_federal
                 state_tax = itemized_state
                 fica_tax = itemized_fica
@@ -312,6 +318,7 @@ class Taxes:
                 niit_ltcg = niit_tax - niit_investment
             # case standard
             else:
+                deduction = 'Standard'
                 federal_tax = standard_federal
                 state_tax = standard_state
                 fica_tax = standard_fica
@@ -329,25 +336,26 @@ class Taxes:
                 niit_investment = Taxes.__niit_tax(earned_income, 0, investment_income)
                 niit_ltcg = niit_tax - niit_investment
 
+            print(f"Deduction: {deduction}")
             print("Earned Income:")
-            print(f"   Federal - {federal_earned}")
-            print(f"   State   - {state_earned}")
-            print(f"   FICA    - {fica_tax}")
-            print(f"   Total   - {federal_earned + state_earned + fica_tax}")
+            print(f"   Federal - {common.fa(federal_earned)}")
+            print(f"   State   - {common.fa(state_earned)}")
+            print(f"   FICA    - {common.fa(fica_tax)}")
+            print(f"   Total   - {common.fa(federal_earned + state_earned + fica_tax)}")
             print("Investment Income:")
-            print(f"   Federal - {federal_investment}")
-            print(f"   State   - {state_investment}")
-            print(f"   NIIT    - {niit_investment}")
-            print(f"   Total   - {federal_investment + state_investment + niit_investment}")
+            print(f"   Federal - {common.fa(federal_investment)}")
+            print(f"   State   - {common.fa(state_investment)}")
+            print(f"   NIIT    - {common.fa(niit_investment)}")
+            print(f"   Total   - {common.fa(federal_investment + state_investment + niit_investment)}")
             print("Long Term Capital Gains:")
-            print(f"   LTCG    - {ltcg_tax}")
-            print(f"   State   - {state_ltcg}")
-            print(f"   NIIT    - {niit_ltcg}")
-            print(f"   Total   - {ltcg_tax + state_ltcg + niit_ltcg}")
+            print(f"   LTCG    - {common.fa(ltcg_tax)}")
+            print(f"   State   - {common.fa(state_ltcg)}")
+            print(f"   NIIT    - {common.fa(niit_ltcg)}")
+            print(f"   Total   - {common.fa(ltcg_tax + state_ltcg + niit_ltcg)}")
             print("Summary:")
-            print(f"   Federal - {federal_tax}")
-            print(f"   State   - {state_tax}")
-            print(f"   LTCG    - {ltcg_tax}")
-            print(f"   FICA    - {fica_tax}")
-            print(f"   NIIT    - {niit_tax}")
-            print(f"   Total   - {federal_tax + state_tax + ltcg_tax + fica_tax + niit_tax}")
+            print(f"   Federal - {common.fa(federal_tax)}")
+            print(f"   State   - {common.fa(state_tax)}")
+            print(f"   LTCG    - {common.fa(ltcg_tax)}")
+            print(f"   FICA    - {common.fa(fica_tax)}")
+            print(f"   NIIT    - {common.fa(niit_tax)}")
+            print(f"   Total   - {common.fa(federal_tax + state_tax + ltcg_tax + fica_tax + niit_tax)}")

@@ -1,3 +1,12 @@
+--- TODO ---
+1 - retirment accounts and handling
+2 - design investment parent class
+3 - refactor stocks
+4 - implement other investments
+5 - add tax handling in simualtor
+6 - improve floating point precision in tax calculation
+
+--- NOTES ---
 Types of income and taxes:
 Earned Income (job income): fica, state, federal
 Investment Income: state, federal

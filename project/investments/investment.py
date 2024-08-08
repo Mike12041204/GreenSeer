@@ -1,3 +1,4 @@
+import common
 from abc import ABC, abstractmethod
 
 class Investment(ABC):

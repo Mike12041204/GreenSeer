@@ -1,3 +1,4 @@
+import common
 from investment import Investment
 
 # TODO - handling selling long term and short term capital gains

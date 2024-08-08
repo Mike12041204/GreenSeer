@@ -1,6 +1,6 @@
-from stock import Stock
+import common
+from investments.stock import Stock
 from investor import Investor
-import locale
 
 # Simulation class is repsonsible for handling input and output and triggering events.
 # The class should not perform complex arithmetic
@@ -58,7 +58,7 @@ class Simulation:
 
             print("-------------------------------------------")
             self.simulate_month()
-            print(f"Net Worth: {self.fc(self.investor.net_worth)}   Month Income: {self.fc(self.investor.month_profit)}")
+            print(f"Net Worth: {common.fa(self.investor.net_worth)}   Month Income: {common.fa(self.investor.month_profit)}")
             print("-------------------------------------------")
             print()
             print()
@@ -139,12 +139,3 @@ class Simulation:
     # TODO - implement
     def change_salary(self):
         pass
-
-    def calculate_taxes(self):
-        pass
-
-    def fc(self, number):
-        return f"${number:,.2f}"
-    
-    def fp(self,number):
-        return f"{number * 100:.2f}%"
