@@ -38,8 +38,14 @@ class Investor:
 
         # simulate period for every investment
         for investment in self.investments:
+
+            # print investment heading
+            if common.DEBUG_TOGGLE == 1:
+                print(f"{investment.__class__.__name__}: {investment.name}")
+
             # handle investment return tuple
-            investment_income, ltcg, expense, deduction, value, liability = investment.simulate_period(period)
+            investment_income, ltcg, expense, deduction, value, liability = \
+             investment.simulate_period(period)
             self.yearly_investment_income += investment_income
             self.yearly_ltcg += ltcg
             self.yearly_expense += expense
@@ -47,17 +53,35 @@ class Investor:
             self.total_value += value
             self.total_liability += liability
 
-            print(investment)
+            # print investment summary
+            if common.DEBUG_TOGGLE == 1:
+                print(investment)
+                common.println3()
 
             # handle cash
-            self.cash += investment.period_investment_income + investment.period_ltcg - investment.period_expense
+            self.cash += (investment.period_investment_income + investment.period_ltcg - 
+                          investment.period_expense)
 
         # apply yearly happenings
         if period % common.PERIODS_PER_YEAR == 0:
+            # print tax header
+            if common.DEBUG_TOGGLE == 1:
+                print("Tax Statement")
+
             # apply taxes
-            taxes_owed = Taxes.calculate_tax(self.yearly_earned_income, self.yearly_deduction, self.yearly_ltcg, self.yearly_salt_deduction, self.yearly_investment_income)
+            taxes_owed = Taxes.calculate_tax(self.yearly_earned_income, self.yearly_deduction, 
+                                             self.yearly_ltcg, self.yearly_salt_deduction, 
+                                             self.yearly_investment_income)
             # tax return
             self.cash -= taxes_owed + self.yearly_taxes_witheld
+
+            # print tax summary
+            if common.DEBUG_TOGGLE == 1:
+                print(f"Taxes: {common.fa(taxes_owed)}   Tax Return: " +
+                      f"{common.fa(self.yearly_taxes_witheld - taxes_owed)}   Effective Rate: " +
+                      str(common.fp(taxes_owed / (self.yearly_earned_income + 
+                                                  self.yearly_investment_income + self.yearly_ltcg))))
+                common.println3()
 
             # reset yearly trackers
             self.reset_values()
@@ -69,10 +93,4 @@ class Investor:
         self.yearly_investment_income = 0
         self.yearly_ltcg = 0
         self.yearly_expense = 0
-        self.yearly_deduction = 0
-
-
-    def __str__(self) -> str:
-        """Displays the investor as a formatted string"""
-
-        return (f"Net Worth: {self.cash + self.total_value - self.total_liability}")        
+        self.yearly_deduction = 0    

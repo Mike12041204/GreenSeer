@@ -24,18 +24,18 @@ class Simulation:
         skip = 0
 
         while running:
-            print("-------------------------------------------")
+            common.println1()
             print(f"Investor: {self.investor.name}   Period: {self.period}")
             if skip == 0:
-                print("-------------------------------------------")
+                common.println2()
                 print("Menu:")
                 print("0: End Simulation")
-                print("1: Finish Month")
+                print("1: Finish Period")
                 print("2: Add Investment")
                 print("3: Manage Investment")
-                print("4: Change Salary and Expenses")
-                print("5: Simulate Year")
-                print("-------------------------------------------")
+                print("4: Modify Investor")
+                print("5: Simulate Periods")
+                common.println3()
 
             while skip == 0:
                 selection = int(input("Make a Selection: "))
@@ -52,17 +52,21 @@ class Simulation:
                 elif selection == 3:
                     self.manage_investment()   
                 elif selection == 4:
-                    self.change_salary()
+                    self.modify_investor()
                 elif selection == 5:
-                    skip = 12
+                    periods = int(input("How many periods to simulate: "))
+                    while periods < 1:
+                        periods = int(input("How many periods to simulate: "))
+                    skip = periods
 
             if skip > 0:
                 skip -= 1   
 
-            print("-------------------------------------------")
+            common.println2()
             self.simulate_period()
-            print(self.investor)
-            print("-------------------------------------------")
+            print(f"Net Worth: " + str(self.investor.cash + self.investor.total_value - 
+                                       self.investor.total_liability))
+            common.println1()
             print()
             print()
             print()
@@ -74,11 +78,11 @@ class Simulation:
     
     # only pertaining to non-owned assets 
     def add_investment(self) -> None:
-        print("-------------------------------------------")
+        common.println3()
         print("Menu:")
         print("0: End Selection")
         print("1: Add Stock")
-        print("-------------------------------------------")
+        common.println3()
 
         while True:
             selection = int(input("Make a Selection: "))
@@ -86,13 +90,11 @@ class Simulation:
                 selection = int(input("Make a Selection: "))
             
             if selection == 0:
-                running = False
                 break
             elif selection == 1:
                 self.add_stock()
 
-        print("-------------------------------------------")
-
+        common.println3()
  
     def add_stock(self) -> None:
         name = input("Enter the Name: ")
@@ -127,5 +129,5 @@ class Simulation:
         pass
 
     # TODO - implement
-    def change_salary(self) -> None:
+    def modify_investor(self) -> None:
         pass

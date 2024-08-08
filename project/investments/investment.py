@@ -45,7 +45,8 @@ class Investment(ABC):
         if period % common.PERIODS_PER_YEAR == 0:
             self.handle_year()
 
-        return self.period_investment_income, self.period_ltcg, self.period_expense, self.period_deduction, self.total_value, self.total_liability
+        return (self.period_investment_income, self.period_ltcg, self.period_expense, 
+                self.period_deduction, self.total_value, self.total_liability)
     
     @abstractmethod
     def handle_month(self) -> None:
@@ -83,8 +84,11 @@ class Investment(ABC):
     def __str__(self) -> str:
         """Displays the period return tuple as a formatted string"""
 
-        return (f"Investment Income: {self.period_investment_income}   LTCG: {self.period_ltcg} " +
-                f"  Expenses:{self.period_expense}\nValue: {self.total_value}   Liability: " +
-                f"{self.total_liability}   Deduction: {self.period_deduction}\nNet Worth: " +
-                f"{self.total_value - self.total_liability}   Profit: " +
-                f"{self.period_investment_income + self.period_ltcg - self.period_expenses}")
+        return (f"Investment Income: {common.fa(self.period_investment_income)}   LTCG: " +
+                f"{common.fa(self.period_ltcg)}   Expenses:{common.fa(self.period_expense)}\n" +
+                f"Value: {common.fa(self.total_value)}   Liability: " +
+                f"{common.fa(self.total_liability)}   Deduction: " +
+                f"{common.fa(self.period_deduction)}\nNet Worth: " +
+                f"{common.fa(self.total_value - self.total_liability)}   Profit: " +
+                str(common.fa(self.period_investment_income + self.period_ltcg - 
+                              self.period_expenses)))

@@ -80,7 +80,9 @@ class Taxes:
     __NIIT_RATE = 3.8
 
     @staticmethod
-    def __federal_earned_income_tax(earned_income, deduction, exemption, investment_income) -> float:
+    def __federal_earned_income_tax(earned_income, deduction, exemption, investment_income) \
+        -> float:
+        
         tax = 0
         income = earned_income + investment_income - exemption - deduction
 
@@ -350,7 +352,7 @@ class Taxes:
                 niit_ltcg = niit_tax - niit_investment
 
             print(f"Deduction: {deduction}")
-            print("Earned Income:")
+            print(f"Earned Income:")
             print(f"   Federal - {common.fa(federal_earned)}")
             print(f"   State   - {common.fa(state_earned)}")
             print(f"   FICA    - {common.fa(fica_tax)}")
