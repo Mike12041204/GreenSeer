@@ -80,7 +80,8 @@ class Investor:
                 print(f"Taxes: {common.fa(taxes_owed)}   Tax Return: " +
                       f"{common.fa(self.yearly_taxes_witheld - taxes_owed)}   Effective Rate: " +
                       str(common.fp(taxes_owed / (self.yearly_earned_income + 
-                                                  self.yearly_investment_income + self.yearly_ltcg))))
+                                                  self.yearly_investment_income + 
+                                                  self.yearly_ltcg))))
                 common.println3()
 
             # reset yearly trackers
